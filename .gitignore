@@ -129,6 +129,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+Kidney-Disease-Classification-Deep-Learning-Project/
+kidny_env_3.10/
 
 # Spyder project settings
 .spyderproject
