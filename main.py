@@ -1,0 +1,2 @@
+from Kidney_Disease import logger
+logger.info("Logging successul for from Kidney_Disease import logger instead of  from src.Kidney_Disease import logger. The setup.py file is congigured to src not Kidney_Disease.")
