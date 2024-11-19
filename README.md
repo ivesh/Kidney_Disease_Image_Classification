@@ -37,7 +37,7 @@ open up you local host and port
 
 ## Workflows
 
-1. Update config.yaml
+1. Update config.yaml- Data ingestion and certain config will be used.
 2. Update secrets.yaml [Optional]
 3. Update params.yaml
 4. Update the entity
@@ -63,5 +63,5 @@ Kidney_Disease Folder:
                 5. get_size is used to get the size of a file
                 6. decodeImage
                 7. encodeImage is used to when building prediction pipeline and user app. 
-            The functionality of configbox and ensure annotations are demonstrated in trials.ipynb file    
+            The functionality of configbox and ensure annotations are demonstrated in trials.ipynb file along with gdown module to download link from google drive to test the data and be able to fetch the data.   
 -    
