@@ -3,6 +3,6 @@ artifacts_root: artifacts
 data_ingestion:
 # data ingestion settings
   root_dir: artifacts/data_ingestion
-  data_source_url: "https://example.com/data"
+  data_source_url: "https://drive.google.com/file/d/1x85hhlrma3KjkHnPQ3tqdGnof922tF0q/view?usp=drive_link"
   local_data_file: artifacts/data_ingestion/data.zip
   unzip_dir: artifacts/data_ingestion
