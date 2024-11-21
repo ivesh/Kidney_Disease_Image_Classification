@@ -3,6 +3,7 @@ import zipfile
 import gdown
 from Kidney_Disease import logger
 from Kidney_Disease.utils.common import get_size
+from Kidney_Disease.entity.config_entity import DataIngestionConfig
 
 class DataIngestion:
     def __init__(self, config: DataIngestionConfig):
