@@ -87,4 +87,7 @@ Kidney_Disease Folder:
 
 - Prepare base model workflow: The necessary code snippet has been successfully tried in the 02_prepare_base_model.ipynb and the same will be arranged as per the workflow. A base model will be dowloaded from Keras application in this case it is VGG16 with custom layers using Softmax activation function. VGG16 will have CNN layers as well as FC layer containing ANN. We will be using CNN layer along with custom FC layer.
     config.yaml- the prepare base model file structure is updated which contains root dir, base models directory saved as .h5 file, and updated base model directory. 
-    params.yaml- A dummy value has been assigned at this point of time with a basic key.
+    params.yaml- As model prepration is begining from here, we are updating the param.yaml file with model related parameters/arguments which is available at this link: https://keras.io/api/applications/vgg/#vgg16-function .
+    The necessary tests for preparebase model is available in the 02_prepare_base_model.ipynb file. The test are for PrepareBaseModelConfig that matches the config and params.yaml parameters to be structured under config_entity.py under entity folder. 
+    Next, ConfigurationManager class will contain function __init__ which will be set to pont towards constant directory and will return the function to create directory. The second function will contain function of get_prepared_base_model that returns PrepareBaseModelConfig  
+    entity folder- It will consist of a file config_entity.py which contains the configuration for base model
