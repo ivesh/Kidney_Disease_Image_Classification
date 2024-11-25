@@ -28,10 +28,10 @@ except Exception as e:
     raise e
 STAGE_NAME= "Model Training stage"
 try:
-    logger.info(f"Prepare base model main funtion has started and it is in stage:{STAGE_NAME}\n")
+    logger.info(f"Model Training main funtion has started and it is in stage:{STAGE_NAME}\n")
     model_training_pipeline=ModelTrainingPipeline()
     model_training_pipeline.main()
-    logger.info(f"Prepare base model main funtion has completed and it is in stage:{STAGE_NAME}\n \n\n x=====End of the stage=====x")
+    logger.info(f"Model Training main funtion has completed and it is in stage:{STAGE_NAME}\n \n\n x=====End of the stage=====x")
 except Exception as e:
     logger.exception (e)
     raise e
