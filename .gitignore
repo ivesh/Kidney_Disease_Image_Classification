@@ -133,6 +133,7 @@ Kidney-Disease-Classification-Deep-Learning-Project/
 kidny_env_3.10/
 artifacts/
 research/kidney_ct_scan.zip
+mlruns/
 
 # Spyder project settings
 .spyderproject
