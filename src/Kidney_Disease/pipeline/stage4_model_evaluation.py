@@ -1,6 +1,12 @@
 from Kidney_Disease.config.configuration import ConfigurationManager
 from Kidney_Disease.components.mlflow_model_evaluation import Evaluation
 from Kidney_Disease import logger
+import distutils
+import setuptools
+import setuptools.dist
+
+# Add version attribute to distutils
+distutils.version = setuptools.__version__
 
 STAGE_NAME="Model Evaluation"
 
@@ -13,7 +19,7 @@ class EvaluationPipeline:
         evaluation = Evaluation(eval_config)
         evaluation.evaluation()
         evaluation.save_score()
-        #evaluation.log_into_mlflow()
+        evaluation.log_into_mlflow()
 
 if __name__=="__main__":
     try:
