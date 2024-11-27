@@ -2,6 +2,8 @@ from Kidney_Disease import logger
 from Kidney_Disease.pipeline.stage1_data_ingestion import DataIngestionTrainingPipeline
 from Kidney_Disease.pipeline.stage2_prepare_base_model import PrepareBasemodelTrainingPipeline
 from Kidney_Disease.pipeline.stage3_model_training import ModelTrainingPipeline
+from Kidney_Disease.pipeline.stage4_model_evaluation import EvaluationPipeline
+
 
 
 
@@ -32,6 +34,15 @@ try:
     model_training_pipeline=ModelTrainingPipeline()
     model_training_pipeline.main()
     logger.info(f"Model Training main funtion has completed and it is in stage:{STAGE_NAME}\n \n\n x=====End of the stage=====x")
+except Exception as e:
+    logger.exception (e)
+    raise e
+STAGE_NAME= "Model Evaluation stage"
+try:
+    logger.info(f"Model Evaluation main funtion has started and it is in stage:{STAGE_NAME}\n")
+    model_eval_pipeline=EvaluationPipeline()
+    model_eval_pipeline.main()
+    logger.info(f"Model Evaluation main funtion has completed and it is in stage:{STAGE_NAME}\n \n\n x=====End of the stage=====x")
 except Exception as e:
     logger.exception (e)
     raise e
