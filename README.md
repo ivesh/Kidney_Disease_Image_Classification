@@ -1,4 +1,301 @@
-# Kidney disease Classification
+# 🧠 Kidney Disease Classification (CT Scan)
+
+## 1. Project Objective
+
+* **Goal**: Build an **end-to-end deep learning pipeline** that classifies kidney CT scans into:
+
+  * **Normal**
+  * **Cyst**
+  * **Tumor**
+  * **Stone**
+* **Key Features**:
+
+  * Modular coding with OOP (classes & functions)
+  * Reproducible pipelines with **DVC**
+  * Experiment tracking with **MLflow**
+  * Deployment with **Flask API + Docker + CI/CD on AWS**
+
+---
+
+## 2. Project Dependencies
+
+Dependencies are listed in **`requirements.txt`**:
+
+* `tensorflow==2.12.0` → deep learning model training
+* `pandas`, `numpy` → data manipulation
+* `matplotlib`, `seaborn` → visualization
+* `mlflow==2.2.2` → experiment tracking
+* `dvc` → data version control and pipeline orchestration
+* `Flask`, `Flask-Cors` → deployment API
+* `tqdm` → progress bar
+* `python-box`, `pyyaml`, `types-PyYAML` → config management
+* `joblib`, `scipy` → utility support
+* `gdown` → dataset download from Google Drive
+* `-e .` → install local package (`src/` as a module)
+
+Install via:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## 3. File Structure
+
+```
+KIDNEY-DISEASE-CLASSIFICATION/
+│── config/
+│   └── config.yaml        # central config file
+│
+│── research/
+│   └── trials.ipynb       # notebook experiments
+│
+│── src/cnnClassifier/
+│   │── __init__.py
+│   │── components/        # modular pipeline components
+│   │── config/            # configuration manager
+│   │── constants/         # project-wide constants
+│   │── entity/            # dataclasses for configs
+│   │── pipeline/          # training & prediction pipelines
+│   │── utils/             # logging, helper functions
+│
+│── templates/
+│   └── index.html         # frontend for Flask app
+│
+│── dvc.yaml               # DVC pipeline definition
+│── params.yaml            # training hyperparameters
+│── requirements.txt       # dependencies
+│── setup.py               # installable package
+│── template.py            # auto-generates folder structure
+│── README.md              # project documentation
+```
+
+---
+
+## Workflows
+
+1. Update config.yaml- Data ingestion and certain config will be used.
+2. Update secrets.yaml [Optional]
+3. Update params.yaml
+4. Update the entity
+5. Update the configuration manager in src config
+6. Update the components
+7. Update the pipeline 
+8. Update the main.py
+9. Update the dvc.yaml
+10. app.py
+
+## 4. Explanation of Files & Workflow
+
+### 🔹 Step 1: Setup & Initialization
+
+* **`template.py`**
+
+  * Auto-generates folder structure (`src/`, `config/`, etc.)
+  * Uses `os` + `logging` for structured creation
+  * First file executed to set up repo
+
+* **`setup.py`**
+
+  * Installs `src/` as a local package (`-e .`)
+  * Required for imports like:
+
+    ```python
+    from cnnClassifier.pipeline import training_pipeline
+    ```
+
+---
+
+### 🔹 Step 2: Config & Parameters
+
+* **`config/config.yaml`**
+
+  * Stores dataset paths, artifact directories, model paths.
+* **`params.yaml`**
+
+  * Stores hyperparameters:
+
+    * `IMG_SIZE`, `BATCH_SIZE`, `EPOCHS`, `LEARNING_RATE`, etc.
+* **`src/cnnClassifier/constants`**
+
+  * Defines constant values to be used across project.
+* **`src/cnnClassifier/entity`**
+
+  * Contains dataclasses (entities) to strongly type config sections.
+
+---
+
+### 🔹 Step 3: Utilities
+
+* **`src/cnnClassifier/utils/__init__.py`**
+
+  * Logging setup:
+
+    ```python
+    logging.basicConfig(level=logging.INFO,
+                        format="%(asctime)s - %(levelname)s - %(message)s")
+    ```
+  * File + console logging
+* Utility functions: path handling, yaml reading/writing, save/load models
+
+---
+
+### 🔹 Step 4: Components
+
+Each component is a **class-based module**:
+
+* `data_ingestion.py` → downloads & extracts dataset (`gdown`, unzip)
+* `prepare_base_model.py` → loads pre-trained CNN (e.g., VGG16, ResNet)
+* `model_trainer.py` → trains transfer learning model
+* `model_evaluation.py` → evaluates accuracy, logs metrics with MLflow
+
+---
+
+### 🔹 Step 5: Pipelines
+
+* **`src/cnnClassifier/pipeline/training_pipeline.py`**
+
+  * Orchestrates all components:
+
+    1. Data Ingestion
+    2. Base Model Preparation
+    3. Training
+    4. Evaluation
+* **`src/cnnClassifier/pipeline/prediction_pipeline.py`**
+
+  * Loads trained `.h5` model
+  * Accepts input CT scan
+  * Outputs prediction (`Normal`, `Tumor`, etc.)
+
+---
+
+### 🔹 Step 6: Flask App
+
+* **`app.py`**
+
+  * Flask web service with routes:
+
+    * `/train` → triggers training pipeline
+    * `/predict` → takes uploaded CT scan → returns class
+  * Uses **templates/index.html** for UI
+
+Run:
+
+```bash
+python app.py
+```
+
+Open browser: `http://127.0.0.1:8080`
+
+---
+
+### 🔹 Step 7: DVC & MLflow
+
+* **`dvc.yaml`**
+
+  * Defines pipeline stages:
+
+    ```yaml
+    stages:
+      data_ingestion:
+        cmd: python src/cnnClassifier/components/data_ingestion.py
+        outs: [artifacts/data]
+      prepare_base_model:
+        cmd: python src/cnnClassifier/components/prepare_base_model.py
+      training:
+        cmd: python src/cnnClassifier/components/model_trainer.py
+      evaluation:
+        cmd: python src/cnnClassifier/components/model_evaluation.py
+    ```
+* **Run pipeline**:
+
+  ```bash
+  dvc repro
+  ```
+* **Track experiments**:
+
+  ```bash
+  mlflow ui
+  ```
+
+  Open: `http://127.0.0.1:5000`
+
+---
+
+### 🔹 Step 8: CI/CD & Deployment
+
+1. **Dockerfile**
+
+   * Containerize Flask app + model
+
+   ```dockerfile
+   FROM python:3.8
+   COPY . /app
+   WORKDIR /app
+   RUN pip install -r requirements.txt
+   CMD ["python", "app.py"]
+   ```
+
+2. **GitHub Actions** (`.github/workflows/main.yml`)
+
+   * Build Docker image
+   * Push to AWS ECR / DockerHub
+   * Deploy on AWS EC2/ECS
+
+3. **Deployment Steps**
+
+   ```bash
+   docker build -t kidney-classifier .
+   docker run -p 8080:8080 kidney-classifier
+   ```
+
+   Access via `http://<EC2-IP>:8080`
+
+---
+
+## 5. Execution Order (Chronological)
+
+1. `template.py` → create folder structure
+2. `setup.py` → install local package
+3. `config/config.yaml` + `params.yaml` → define config
+4. `entity/` → define dataclasses
+5. `components/` (data\_ingestion → base\_model → training → evaluation)
+6. `pipeline/training_pipeline.py` → orchestrates components
+7. `pipeline/prediction_pipeline.py` → for predictions
+8. `dvc.yaml` → reproducible pipeline execution
+9. `mlflow` → log experiments
+10. `app.py` → Flask app
+11. `Dockerfile` + CI/CD workflow → Deployment on AWS
+
+---
+
+## 6. Fetching Results
+
+* Run locally:
+
+  ```bash
+  python app.py
+  ```
+* Upload CT scan → get predicted class
+* Or run prediction pipeline directly:
+
+  ```bash
+  python src/cnnClassifier/pipeline/prediction_pipeline.py --image test.png
+  ```
+
+---
+
+## 7. Project Lifecycle
+
+1. **Problem Definition** → Classify kidney CT scans (Normal, Cyst, Tumor, Stone)
+2. **Data Ingestion** → Download dataset from Kaggle/Drive
+3. **Data Preprocessing** → Augmentation, resizing, normalization
+4. **Model Preparation** → Transfer Learning (VGG16/ResNet)
+5. **Training & Evaluation** → MLflow tracking, DVC pipeline
+6. **Packaging** → `setup.py`, modular coding
+7. **Deployment** → Flask API + Docker + CI/CD on AWS
+8. **Monitoring** → Logs, MLflow experiments, retraining on new data
 
 # How to run?
 ### STEPS:
@@ -34,62 +331,7 @@ Now,
 open up you local host and port
 ```
 ## Goals of the project to classify Kidney disease as per the images if it is normal or not.
-
-## Workflows
-
-1. Update config.yaml- Data ingestion and certain config will be used.
-2. Update secrets.yaml [Optional]
-3. Update params.yaml
-4. Update the entity
-5. Update the configuration manager in src config
-6. Update the components
-7. Update the pipeline 
-8. Update the main.py
-9. Update the dvc.yaml
-10. app.py
+---
 
 
-## File Structure
-Kidney_Disease Folder:
-    __init__.py: Logger code is kept here instead od creating an other one to directly import the logger file without mentioning src.Kidney_Disease the same setup has been done under setup.py.
-
-    Utils Folder:
-        -common.py : all commonly used functions used throughout the project is stored here. 
-            This file has the following functions. On top of every function ensure annotation decorator is used to make sure the output and the input behave exactly as it is coded.
-                1. Read yaml and return configbox return type
-                2. Create directories for artifacts folder, data ingestion and data validation
-                3. save_json is used to save the model metrics
-                4. load_bin is used to load the binary file
-                5. get_size is used to get the size of a file
-                6. decodeImage
-                7. encodeImage is used to when building prediction pipeline and user app. 
-            The functionality of configbox and ensure annotations are demonstrated in trials.ipynb file along with gdown module to download link from google drive to test the data and be able to fetch the data.   
--   Data Ingestion workflow: The necessary code snippet has been successfully tried in the 01_data_ingestion.ipynb notebook file.
-    config.yaml- the artifacts folder structure where our images needs to be downloaded from, the file directory it needs to be saved is mentioned. The important attributes are:
-        - artifacts_root: artifacts
-        - data ingestion: 
-            - root_dir: "directory within which the data should be stored locally"
-            - data_source_url: "the path where the images are downloaded from"
-            - local_data_file: "file name and the directory where downloaded data will be stored"
-            - unzip_dir: "directory where the unzipped content will reside"
-    params.yaml- A dummy value has been assigned at this point of time with a basic key:val pair else it would give an error later while executing.
-    entity folder- It will consist of a file config_entity.py which contains the configuration for data ingestion using dataclass and the parameters set to frozen.
-        config_entity.py- The data ingestion configuration is defined here. The data ingestion configuration is defined here
-    constants folder- It will contain the code where the path of our directories is fixed which is CONFIG_FILE_PAATH AND PARAMS_FILE_PATH. 
-    config folder- It will consist of a file named configuration.py which will contain the configuration manager.   
-        configuration.py- One of the function is used to create directories and the other is used to set the get_data_ingestion_config to data ingestion config set in entity.
-    COMPONENTS folder: It will consist of a data_ingestion.py file.
-        data_ingestion.py- This file will be having a class DataIngestion which will have two main methods which are download data from gdrive and extract all files to Unzip_directory   
-    Pipeline Folder: It is structured in different stages where for the first stage stage1_data_ingestion.py file is prepared to handle data ingestion.
-        stage1_data_ingestion.py- This file will be having a class DataIngestionPipeline class where config is set to configuration manager, data_ingestion_config is set to get_data_ingestion method, data_ingestion variable is initialized to DataIngestion class within which config is set to data_ingestion_config. After this data_ingestion.download_file() and  data_ingestion.extract_files() has been executed.
-        if __name__==__main__ is used to run the class DataIngestionPipeline.
-    main.py file: it will import data ingestion pipeline which will be initialized to a variable that can be used to run the main code present within DataIngestionPipeline class to download and extract our data.     
-
-- Prepare base model workflow: The necessary code snippet has been successfully tried in the 02_prepare_base_model.ipynb and the same will be arranged as per the workflow. A base model will be dowloaded from Keras application in this case it is VGG16 with custom layers using Softmax activation function. VGG16 will have CNN layers as well as FC layer containing ANN. We will be using CNN layer along with custom FC layer.
-    config.yaml- the prepare base model file structure is updated which contains root dir, base models directory saved as .h5 file, and updated base model directory. 
-    params.yaml- As model prepration is begining from here, we are updating the param.yaml file with model related parameters/arguments which is available at this link: https://keras.io/api/applications/vgg/#vgg16-function .
-    The necessary tests for preparebase model is available in the 02_prepare_base_model.ipynb file. The test are for PrepareBaseModelConfig that matches the config and params.yaml parameters to be structured under config_entity.py under entity folder. 
-    Next, ConfigurationManager class will contain function __init__ which will be set to pont towards constant directory and will return the function to create directory. The second function will contain function of get_prepared_base_model that returns PrepareBaseModelConfig  
-    entity folder- It will consist of a file config_entity.py which contains the configuration for base model. o2_prepare base_model.ipynb describes whicn code should belong to which folder in detail. In brief, Entity folder- congig_entity.py, config folder - configuration.py -> Configuration manager, Components -> prepare_base_model.py, Pipeline -> stage2_prepare_base_model.py, and then finally main.py.
-- Model Training: Entity has to be prepared before that update config.yaml file with training congiuration, along with that entity part has been updated in 03_model_traioning.ipynb.
--Model Evaluation: MLflow and DVC      
+     
